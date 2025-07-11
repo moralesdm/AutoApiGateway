@@ -1,0 +1,52 @@
+name: 🚀 Deploy API Gateway
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy-gateway:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: 🔐 Desplegar en EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            # Instalar Docker si no está presente
+            if ! command -v docker &> /dev/null; then
+              curl -fsSL https://get.docker.com -o get-docker.sh
+              sudo sh get-docker.sh
+              rm get-docker.sh
+            fi
+
+            # Verificar docker-compose
+            if ! command -v docker-compose &> /dev/null; then
+              sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+              sudo chmod +x /usr/local/bin/docker-compose
+            fi
+
+            # Navegar al proyecto y actualizar código
+            cd /ruta/a/tu/proyecto/api-gateway
+            git pull
+
+            # Ejecutar con variables
+            USUARIOS_HOST=${{ secrets.USUARIOS_HOST }} \
+            USUARIOS_PORT=${{ secrets.USUARIOS_PORT }} \
+            VEHICULOS_HOST=${{ secrets.VEHICULOS_HOST }} \
+            VEHICULOS_PORT=${{ secrets.VEHICULOS_PORT }} \
+            ALQUILERES_HOST=${{ secrets.ALQUILERES_HOST }} \
+            ALQUILERES_PORT=${{ secrets.ALQUILERES_PORT }} \
+            FACTURAS_HOST=${{ secrets.FACTURAS_HOST }} \
+            FACTURAS_PORT=${{ secrets.FACTURAS_PORT }} \
+            docker-compose up --build -d

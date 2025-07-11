@@ -38,7 +38,7 @@ jobs:
             fi
 
             # Navegar al proyecto y actualizar código
-            cd /ruta/a/tu/proyecto/api-gateway
+            cd /home/ubuntu/api-gateway
             git pull
 
             # Ejecutar con variables

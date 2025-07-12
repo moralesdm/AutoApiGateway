@@ -5,8 +5,6 @@ services:
     build: ./nginx
     ports:
       - "80:80"
-    env_file:
-      - .env      # Para desarrollo local
     environment:  # Estas variables pueden ser sobreescritas en producción (GitHub Actions, EC2, etc)
       SERVICE1_HOST: ${SERVICE1_HOST}
       SERVICE1_PORT: ${SERVICE1_PORT}

@@ -1,53 +1,81 @@
-name: 🚀 Deploy API Gateway
+name: Deploy API Gateway
 
 on:
-  pull_request:
-    branches:
-      - main
   push:
-    branches:
-      - dev
-      - main
+    branches: [ main ]
 
 jobs:
-  deploy-gateway:
+  deploy:
     runs-on: ubuntu-latest
 
-    steps:
-      - name: 📥 Checkout del repositorio
-        uses: actions/checkout@v4
+    env:
+      SERVICE1_HOST: ${{ secrets.USUARIOS_HOST }}
+      SERVICE1_PORT: ${{ secrets.USUARIOS_PORT }}
+      SERVICE2_HOST: ${{ secrets.VEHICULOS_HOST }}
+      SERVICE2_PORT: ${{ secrets.VEHICULOS_PORT }}
+      SERVICE3_HOST: ${{ secrets.ALQUILERES_HOST }}
+      SERVICE3_PORT: ${{ secrets.ALQUILERES_PORT }}
+      SERVICE4_HOST: ${{ secrets.FACTURAS_HOST }}
+      SERVICE4_PORT: ${{ secrets.FACTURAS_PORT }}
 
-      - name: 🔐 Desplegar en EC2
-        uses: appleboy/ssh-action@v1.0.3
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Copy files to EC2 via SCP
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: |
+            docker-compose.yml
+            nginx/*
+          target: /home/${{ secrets.EC2_USER }}/api-gateway
+
+      - name: SSH into EC2 and deploy API Gateway
+        uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
+          envs: SERVICE1_HOST,SERVICE1_PORT,SERVICE2_HOST,SERVICE2_PORT,SERVICE3_HOST,SERVICE3_PORT,SERVICE4_HOST,SERVICE4_PORT
           script: |
-            # Instalar Docker si no está presente
+            set -e
+
+            echo "🔍 Checking Docker installation..."
             if ! command -v docker &> /dev/null; then
-              curl -fsSL https://get.docker.com -o get-docker.sh
-              sudo sh get-docker.sh
-              rm get-docker.sh
+              echo "📦 Installing Docker..."
+              sudo apt-get update -y
+              sudo apt-get install -y docker.io
+              sudo systemctl start docker
+              sudo systemctl enable docker
+            else
+              echo "✅ Docker is already installed."
             fi
 
-            # Verificar docker-compose
-            if ! command -v docker-compose &> /dev/null; then
-              sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-              sudo chmod +x /usr/local/bin/docker-compose
+            echo "🔍 Checking Docker Compose..."
+            if ! docker compose version &> /dev/null; then
+              echo "🔧 Installing Docker Compose plugin..."
+              sudo apt-get install -y docker-compose-plugin || sudo apt-get install -y docker-compose
+            else
+              echo "✅ Docker Compose is already installed."
             fi
 
-            # Navegar al proyecto y actualizar código
-            cd /home/ubuntu/api-gateway
-            git pull
+            cd /home/${{ secrets.EC2_USER }}/api-gateway
 
-            # Ejecutar con variables
-            USUARIOS_HOST=${{ secrets.USUARIOS_HOST }} \
-            USUARIOS_PORT=${{ secrets.USUARIOS_PORT }} \
-            VEHICULOS_HOST=${{ secrets.VEHICULOS_HOST }} \
-            VEHICULOS_PORT=${{ secrets.VEHICULOS_PORT }} \
-            ALQUILERES_HOST=${{ secrets.ALQUILERES_HOST }} \
-            ALQUILERES_PORT=${{ secrets.ALQUILERES_PORT }} \
-            FACTURAS_HOST=${{ secrets.FACTURAS_HOST }} \
-            FACTURAS_PORT=${{ secrets.FACTURAS_PORT }} \
-            docker-compose up --build -d
+            echo "🛑 Stopping existing containers..."
+            SERVICE1_HOST=$SERVICE1_HOST SERVICE1_PORT=$SERVICE1_PORT \
+            SERVICE2_HOST=$SERVICE2_HOST SERVICE2_PORT=$SERVICE2_PORT \
+            SERVICE3_HOST=$SERVICE3_HOST SERVICE3_PORT=$SERVICE3_PORT \
+            SERVICE4_HOST=$SERVICE4_HOST SERVICE4_PORT=$SERVICE4_PORT \
+            sudo -E docker compose down
+
+            echo "🚀 Starting new containers with environment variables..."
+            SERVICE1_HOST=$SERVICE1_HOST SERVICE1_PORT=$SERVICE1_PORT \
+            SERVICE2_HOST=$SERVICE2_HOST SERVICE2_PORT=$SERVICE2_PORT \
+            SERVICE3_HOST=$SERVICE3_HOST SERVICE3_PORT=$SERVICE3_PORT \
+            SERVICE4_HOST=$SERVICE4_HOST SERVICE4_PORT=$SERVICE4_PORT \
+            sudo -E docker compose up -d --build
+
+            echo "✅ Deployment complete!"

@@ -22,6 +22,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Debug list project files
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Files:"
+          ls -la
+          echo "Nginx folder:"
+          ls -la nginx/
+
       - name: Create remote directory
         uses: appleboy/ssh-action@v1.0.0
         with:

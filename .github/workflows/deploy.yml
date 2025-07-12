@@ -84,7 +84,7 @@ jobs:
             SERVICE2_HOST=$SERVICE2_HOST SERVICE2_PORT=$SERVICE2_PORT \
             SERVICE3_HOST=$SERVICE3_HOST SERVICE3_PORT=$SERVICE3_PORT \
             SERVICE4_HOST=$SERVICE4_HOST SERVICE4_PORT=$SERVICE4_PORT \
-            sudo -E docker compose down
+            sudo -E docker compose --env-file /dev/null down
 
             echo "🚀 Starting new containers with environment variables..."
             SERVICE1_HOST=$SERVICE1_HOST SERVICE1_PORT=$SERVICE1_PORT \

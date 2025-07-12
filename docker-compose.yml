@@ -2,15 +2,17 @@ version: '3.8'
 
 services:
   api-gateway:
-    build: .
+    build: ./nginx
     ports:
       - "80:80"
-    environment:
-      USUARIOS_HOST: ${USUARIOS_HOST}
-      USUARIOS_PORT: ${USUARIOS_PORT}
-      VEHICULOS_HOST: ${VEHICULOS_HOST}
-      VEHICULOS_PORT: ${VEHICULOS_PORT}
-      ALQUILERES_HOST: ${ALQUILERES_HOST}
-      ALQUILERES_PORT: ${ALQUILERES_PORT}
-      FACTURAS_HOST: ${FACTURAS_HOST}
-      FACTURAS_PORT: ${FACTURAS_PORT}
+    env_file:
+      - .env      # Para desarrollo local
+    environment:  # Estas variables pueden ser sobreescritas en producción (GitHub Actions, EC2, etc)
+      SERVICE1_HOST: ${SERVICE1_HOST}
+      SERVICE1_PORT: ${SERVICE1_PORT}
+      SERVICE2_HOST: ${SERVICE2_HOST}
+      SERVICE2_PORT: ${SERVICE2_PORT}
+      SERVICE3_HOST: ${SERVICE3_HOST}
+      SERVICE3_PORT: ${SERVICE3_PORT}
+      SERVICE4_HOST: ${SERVICE4_HOST}
+      SERVICE4_PORT: ${SERVICE4_PORT}

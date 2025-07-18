@@ -5,58 +5,12 @@ services:
     build: ./nginx
     ports:
       - "80:80"
-<<<<<<< HEAD
-    depends_on:
-      - autobackend1
-      - autobackend2
-      - autobackend3
-      - autobackend4
-    environment:
-      SERVICE1_HOST: autobackend1
-      SERVICE1_PORT: 3001
-      SERVICE2_HOST: autobackend2
-      SERVICE2_PORT: 3002
-      SERVICE3_HOST: autobackend3
-      SERVICE3_PORT: 3003
-      SERVICE4_HOST: autobackend4
-      SERVICE4_PORT: 3004
-    networks:
-      - backend-net
-
-  autobackend1:
-    image: moralesdm/autobackend1:latest
-    container_name: autobackend1
-    ports:
-      - "3001:3001"
-    networks:
-      - backend-net
-
-  autobackend2:
-    image: moralesdm/autobackend2:latest
-    container_name: autobackend2
-    ports:
-      - "3002:3002"
-    networks:
-      - backend-net
-
-  autobackend3:
-    image: moralesdm/autobackend3:latest
-    container_name: autobackend3
-    ports:
-      - "3003:3003"
-    networks:
-      - backend-net
-
-  autobackend4:
-    image: moralesdm/autobackend4:latest
-    container_name: autobackend4
-    ports:
-      - "3004:3004"
-    networks:
-      - backend-net
-
-networks:
-  backend-net:
-    driver: bridge
-=======
->>>>>>> parent of 2c87494 (fix(docker-compose): 🔧 update api-gateway configuration with explicit backend service definitions and environment variables)
+    environment:  # Estas variables pueden ser sobreescritas en producción (GitHub Actions, EC2, etc)
+      SERVICE1_HOST: ${SERVICE1_HOST}
+      SERVICE1_PORT: ${SERVICE1_PORT}
+      SERVICE2_HOST: ${SERVICE2_HOST}
+      SERVICE2_PORT: ${SERVICE2_PORT}
+      SERVICE3_HOST: ${SERVICE3_HOST}
+      SERVICE3_PORT: ${SERVICE3_PORT}
+      SERVICE4_HOST: ${SERVICE4_HOST}
+      SERVICE4_PORT: ${SERVICE4_PORT}

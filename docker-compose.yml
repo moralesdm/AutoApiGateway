@@ -12,14 +12,14 @@ services:
       - autobackend3
       - autobackend4
     environment:
-      SERVICE1_HOST: autobackend1
-      SERVICE1_PORT: 3001
-      SERVICE2_HOST: autobackend2
-      SERVICE2_PORT: 3002
-      SERVICE3_HOST: autobackend3
-      SERVICE3_PORT: 3003
-      SERVICE4_HOST: autobackend4
-      SERVICE4_PORT: 3004
+      SERVICE1_HOST: ${SERVICE1_HOST}
+      SERVICE1_PORT: ${SERVICE1_PORT}
+      SERVICE2_HOST: ${SERVICE2_HOST}
+      SERVICE2_PORT: ${SERVICE2_PORT}
+      SERVICE3_HOST: ${SERVICE3_HOST}
+      SERVICE3_PORT: ${SERVICE3_PORT}
+      SERVICE4_HOST: ${SERVICE4_HOST}
+      SERVICE4_PORT: ${SERVICE4_PORT}
     networks:
       - backend-net
 

@@ -12,9 +12,6 @@ services:
       - autobackend3
       - autobackend4
     environment:
-=======
-    environment:  # Estas variables pueden ser sobreescritas en producción (GitHub Actions, EC2, etc)
->>>>>>> parent of 2c87494 (fix(docker-compose): 🔧 update api-gateway configuration with explicit backend service definitions and environment variables)
       SERVICE1_HOST: ${SERVICE1_HOST}
       SERVICE1_PORT: ${SERVICE1_PORT}
       SERVICE2_HOST: ${SERVICE2_HOST}
@@ -23,7 +20,6 @@ services:
       SERVICE3_PORT: ${SERVICE3_PORT}
       SERVICE4_HOST: ${SERVICE4_HOST}
       SERVICE4_PORT: ${SERVICE4_PORT}
-<<<<<<< HEAD
     networks:
       - backend-net
 

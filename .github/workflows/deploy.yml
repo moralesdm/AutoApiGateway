@@ -1,49 +1,49 @@
-      - name: SSH into EC2 and deploy API Gateway
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_KEY }}
-          envs: SERVICE1_HOST,SERVICE1_PORT,SERVICE2_HOST,SERVICE2_PORT,SERVICE3_HOST,SERVICE3_PORT,SERVICE4_HOST,SERVICE4_PORT
-          script: |
-            set -e
+- name: SSH into EC2 and deploy API Gateway
+  uses: appleboy/ssh-action@v1.0.0
+  with:
+    host: ${{ secrets.EC2_HOST }}
+    username: ${{ secrets.EC2_USER }}
+    key: ${{ secrets.EC2_KEY }}
+    envs: SERVICE1_HOST,SERVICE1_PORT,SERVICE2_HOST,SERVICE2_PORT,SERVICE3_HOST,SERVICE3_PORT,SERVICE4_HOST,SERVICE4_PORT
+    script: |
+      set -e
 
-            echo "🔍 Checking Docker installation..."
-            if ! command -v docker &> /dev/null; then
-              echo "📦 Installing Docker..."
-              sudo apt-get update -y
-              sudo apt-get install -y docker.io
-              sudo systemctl start docker
-              sudo systemctl enable docker
-            else
-              echo "✅ Docker is already installed."
-            fi
+      echo "Checking Docker installation..."
+      if ! command -v docker &> /dev/null; then
+        echo "Installing Docker..."
+        sudo apt-get update -y
+        sudo apt-get install -y docker.io
+        sudo systemctl start docker
+        sudo systemctl enable docker
+      else
+        echo "Docker is already installed."
+      fi
 
-            echo "🔍 Checking Docker Compose..."
-            if ! docker compose version &> /dev/null; then
-              echo "🔧 Installing Docker Compose plugin..."
-              sudo apt-get install -y docker-compose-plugin || sudo apt-get install -y docker-compose
-            else
-              echo "✅ Docker Compose already installed."
-            fi
+      echo "Checking Docker Compose..."
+      if ! docker compose version &> /dev/null; then
+        echo "Installing Docker Compose plugin..."
+        sudo apt-get install -y docker-compose-plugin || sudo apt-get install -y docker-compose
+      else
+        echo "Docker Compose already installed."
+      fi
 
-            cd /home/${{ secrets.EC2_USER }}/api-gateway
+      cd /home/$USER/api-gateway
 
-            echo "🧹 Removing old container if exists..."
-            sudo docker rm -f api-gateway-api-gateway-1 || true
+      echo "Removing old container if it exists..."
+      sudo docker rm -f api-gateway-api-gateway-1 || true
 
-            echo "🛑 Stopping docker compose (if running)..."
-            SERVICE1_HOST=$SERVICE1_HOST SERVICE1_PORT=$SERVICE1_PORT \
-            SERVICE2_HOST=$SERVICE2_HOST SERVICE2_PORT=$SERVICE2_PORT \
-            SERVICE3_HOST=$SERVICE3_HOST SERVICE3_PORT=$SERVICE3_PORT \
-            SERVICE4_HOST=$SERVICE4_HOST SERVICE4_PORT=$SERVICE4_PORT \
-            sudo -E docker compose --env-file /dev/null down || true
+      echo "Stopping docker compose (if running)..."
+      SERVICE1_HOST=$SERVICE1_HOST SERVICE1_PORT=$SERVICE1_PORT \
+      SERVICE2_HOST=$SERVICE2_HOST SERVICE2_PORT=$SERVICE2_PORT \
+      SERVICE3_HOST=$SERVICE3_HOST SERVICE3_PORT=$SERVICE3_PORT \
+      SERVICE4_HOST=$SERVICE4_HOST SERVICE4_PORT=$SERVICE4_PORT \
+      sudo -E docker compose --env-file /dev/null down || true
 
-            echo "🚀 Starting new containers with environment variables..."
-            SERVICE1_HOST=$SERVICE1_HOST SERVICE1_PORT=$SERVICE1_PORT \
-            SERVICE2_HOST=$SERVICE2_HOST SERVICE2_PORT=$SERVICE2_PORT \
-            SERVICE3_HOST=$SERVICE3_HOST SERVICE3_PORT=$SERVICE3_PORT \
-            SERVICE4_HOST=$SERVICE4_HOST SERVICE4_PORT=$SERVICE4_PORT \
-            sudo -E docker compose --env-file /dev/null up -d --build
+      echo "Starting new containers with environment variables..."
+      SERVICE1_HOST=$SERVICE1_HOST SERVICE1_PORT=$SERVICE1_PORT \
+      SERVICE2_HOST=$SERVICE2_HOST SERVICE2_PORT=$SERVICE2_PORT \
+      SERVICE3_HOST=$SERVICE3_HOST SERVICE3_PORT=$SERVICE3_PORT \
+      SERVICE4_HOST=$SERVICE4_HOST SERVICE4_PORT=$SERVICE4_PORT \
+      sudo -E docker compose --env-file /dev/null up -d --build
 
-            echo "✅ Deployment complete!"
+      echo "Deployment complete!"
